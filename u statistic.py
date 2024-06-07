@@ -3,9 +3,7 @@ from functools import reduce
 
 real = pd.read_csv('real_data.csv', sep=';')
 df = pd.read_csv('forecast.csv', sep=';')
-df = df.rename(columns={'Unnamed: 0': 'time'})
 df.set_index('time', inplace=True)
-real = real.rename(columns={'Unnamed: 0': 'time'})
 real.set_index('time', inplace=True)
 
 real = real[df.iloc[0].name:df.iloc[-1].name]
