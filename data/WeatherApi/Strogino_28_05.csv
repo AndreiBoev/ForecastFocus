@@ -1,4 +1,4 @@
-;temp;wind;pressure;humidity
+time;temp;wind;pressure;humidity
 morning2024-05-28;13.03;5.82;770.1279999999999;75.5
 day2024-05-28;18.35;7.08;769.112;57.0
 evening2024-05-28;24.58;9.4;767.334;40.0
