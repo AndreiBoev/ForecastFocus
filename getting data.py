@@ -75,7 +75,7 @@ def yandex(KEY):
                                                              day['parts'][time]['windSpeed'],
                                                              day['parts'][time]['pressure'],
                                                              day['parts'][time]['humidity']]
-                df.to_csv(location['place'] + '.csv', sep=';')
+                df.to_csv(location['place'] + '.csv', sep=';', index_label="time")
             else:
                 print("Oh no, I couldn't get the data.")
         except Exception as e:
@@ -94,7 +94,7 @@ def open_weather(KEY):
                     df3.loc[str(datetime.fromtimestamp(day['dt'])) + time] = [day['temp'][time], day['speed'],
                                                                               day['pressure'],
                                                                               day['humidity']]
-            df3.to_csv('name.csv', sep=';')
+            df3.to_csv('name.csv', sep=';', index_label="time")
         else:
             print("Oh no, I couldn't get the data.")
     except Exception as e:
@@ -121,7 +121,7 @@ def weather_api(KEY):
                                                    value('pressure_in', n, day['hour']) * 25.4,
                                                    value('humidity', n, day['hour'])]
                     n += 6
-            df2.to_csv('name.csv', sep=';')
+            df2.to_csv('name.csv', sep=';', index_label="time")
         else:
             print("Oh no, I couldn't get the data.")
     except Exception as e:
