@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
-# import datetime
 load_dotenv()
 
 YANDEX_KEY = str(os.getenv('YANDEX_API_KEY'))
@@ -20,69 +20,65 @@ def api(response):
         return
 
 
-def yandex(KEY):
+def yandex(KEY, name, days, lat, lon):
     access_key = KEY
     headers = {
         "X-Yandex-API-Key": access_key
     }
-    location = {'lat: 55.75697232932146,  lon: 37.614235566135356': 'RedSquare',
-                'lat: 55.803788, lon: 37.402695': 'Strogino',
-                'lat: 55.67012,  lon: 337.27954': 'shamrock'}
-    for place in location.keys():
-        query = """{
-          weatherByPoint(request: {""" + place + """ }) {
-          forecast {
-            days(limit: 30) {
-              time
-              parts {
-                morning {
-                  avgTemperature
-                  windSpeed
-                  pressure
-                  humidity
-                }
-                day {
-                  avgTemperature
-                  windSpeed
-                  pressure
-                  humidity
-                }
-                evening {
-                  avgTemperature
-                  windSpeed
-                  pressure
-                  humidity
-                }
-                night {
-                  avgTemperature
-                  windSpeed
-                  pressure
-                  humidity
-                }
-              }
+    query = """{
+      weatherByPoint(request: {""" + f'lat:{lat}, lon:{lon}' + """ }) {
+      forecast {
+        days(limit:""" + str(days) + """) {
+          time
+          parts {
+            morning {
+              avgTemperature
+              windSpeed
+              pressure
+              humidity
+            }
+            day {
+              avgTemperature
+              windSpeed
+              pressure
+              humidity
+            }
+            evening {
+              avgTemperature
+              windSpeed
+              pressure
+              humidity
+            }
+            night {
+              avgTemperature
+              windSpeed
+              pressure
+              humidity
             }
           }
         }
-      }"""
-        try:
-            response = api(
-                requests.post('https://api.weather.yandex.ru/graphql/query', headers=headers, json={'query': query}))
-            if (data := response):
-                df = pd.DataFrame(columns=['temp', 'wind', 'pressure', 'humidity'])
-                for day in data['data']['weatherByPoint']['forecast']['days']:
-                    for time in day['parts']:
-                        df.loc[day['time'][0:10:] + time] = [day['parts'][time]['avgTemperature'],
-                                                             day['parts'][time]['windSpeed'],
-                                                             day['parts'][time]['pressure'],
-                                                             day['parts'][time]['humidity']]
-                df.to_csv(location['place'] + '.csv', sep=';', index_label="time")
-            else:
-                print("Oh no, I couldn't get the data.")
-        except Exception as e:
-            print(f'request execution error: {e}')
+      }
+    }
+  }"""
+    try:
+        response = api(
+            requests.post('https://api.weather.yandex.ru/graphql/query', headers=headers, json={'query': query}))
+        if (data := response):
+            df = pd.DataFrame(columns=['temp', 'wind', 'pressure', 'humidity'])
+            for day in data['data']['weatherByPoint']['forecast']['days']:
+                for time in day['parts']:
+                    df.loc[day['time'][0:10:] + time] = [day['parts'][time]['avgTemperature'],
+                                                         day['parts'][time]['windSpeed'],
+                                                         day['parts'][time]['pressure'],
+                                                         day['parts'][time]['humidity']]
+            df.to_csv(f'{name}.csv', sep=';', index_label="time")
+        else:
+            print("Oh no, I couldn't get the data.")
+    except Exception as e:
+        print(f'request execution error: {e}')
 
 
-def open_weather(KEY):
+def open_weather(KEY, name, days, lat, lon, ):
     params = {'lat': lat, 'lon': lon, 'APPID': KEY, 'cnt': days, 'units': 'metric'}
     url = 'https://pro.openweathermap.org/data/2.5/forecast/climate'
     try:
@@ -94,16 +90,16 @@ def open_weather(KEY):
                     df3.loc[str(datetime.fromtimestamp(day['dt'])) + time] = [day['temp'][time], day['speed'],
                                                                               day['pressure'],
                                                                               day['humidity']]
-            df3.to_csv('name.csv', sep=';', index_label="time")
+            df3.to_csv(f'{name}.csv', sep=';', index_label="time")
         else:
             print("Oh no, I couldn't get the data.")
     except Exception as e:
         print(f'request execution error: {e}')
 
 
-def weather_api(KEY):
+def weather_api(KEY, name, days, lat, lon):
     url = 'http://api.weatherapi.com/v1/forecast.json'
-    params = {'q': '55.803788,37.402695', 'KEY': KEY, 'days': '10', 'wind100kph': 'yes'}
+    params = {'q': f'{lat},{lon}', 'KEY': KEY, 'days': days, 'wind100kph': 'yes'}
     try:
         response = api(requests.get(url, params=params))
         if (data := response):
@@ -121,10 +117,13 @@ def weather_api(KEY):
                                                    value('pressure_in', n, day['hour']) * 25.4,
                                                    value('humidity', n, day['hour'])]
                     n += 6
-            df2.to_csv('name.csv', sep=';', index_label="time")
+            df2.to_csv(f'{name}.csv', sep=';', index_label="time")
         else:
             print("Oh no, I couldn't get the data.")
     except Exception as e:
         print(f'request execution error: {e}')
 
 
+# open_weather(OPEN_WEATHER_KEY, 'ow08.06',  10,'55.75697232932146', '37.614235566135356' )
+# weather_api(WEATHER_API_KEY, 'wa08.06', 10, '55.75697232932146', '37.614235566135356')
+#yandex(YANDEX_KEY, 'yx08.06', 10, '55.75697232932146', '37.614235566135356')
