@@ -209,11 +209,11 @@ class Ui_MainWindow(object):
         error.setStandardButtons(QMessageBox.Ok)
         error.exec()
 
-    def api(self, response):
+    def api(self, response, webs):
         if response.status_code == 200:
             return response.json()
         else:
-            self.cant_do_request(response.status_code)
+            self.cant_do_request(response.status_code, webs)
             return
         
     def cant_do_request(self, e, webs):
@@ -284,7 +284,7 @@ class Ui_MainWindow(object):
     }"""
         try:
             response = self.api(
-                requests.post('https://api.weather.yandex.ru/graphql/query', headers=headers, json={'query': query}))
+                requests.post('https://api.weather.yandex.ru/graphql/query', headers=headers, json={'query': query}), "YanexWeather")
             if (data := response):
                 df = pd.DataFrame(columns=['temp', 'wind', 'pressure', 'humidity'])
                 for day in data['data']['weatherByPoint']['forecast']['days']:
@@ -304,12 +304,13 @@ class Ui_MainWindow(object):
         params = {'lat': lat, 'lon': lon, 'APPID': KEY, 'cnt': days, 'units': 'metric'}
         url = 'https://pro.openweathermap.org/data/2.5/forecast/climate'
         try:
-            response = self.api(requests.get(url, params=params))
+            response = self.api(requests.get(url, params=params), "OpenWeather")
             if (data := response):
                 df3 = pd.DataFrame(columns=['temp', 'wind', 'pressure', 'humidity'])
                 for day in data['list']:
                     for time in ['morn', 'day', 'eve', 'night']:
-                        df3.loc[str(datetime.fromtimestamp(day['dt'])) + time] = [day['temp'][time], day['speed'],
+                        df3.loc[str(datetime.fromtimestamp(day['dt']))[0:10:] + (
+                            time if time == 'day' or time == 'night' else time + 'ing')] = [day['temp'][time], day['speed'],
                                                                                 day['pressure'],
                                                                                 day['humidity']]
                 df3.to_csv(f'{name}.csv', sep=';', index_label="time")
@@ -323,7 +324,7 @@ class Ui_MainWindow(object):
         url = 'http://api.weatherapi.com/v1/forecast.json'
         params = {'q': f'{lat},{lon}', 'KEY': KEY, 'days': days, 'wind100kph': 'yes'}
         try:
-            response = self.api(requests.get(url, params=params))
+            response = self.api(requests.get(url, params=params), "WeatherAPI")
             if (data := response):
                 def value(parametr, start, list):
                     sum = 0
@@ -335,7 +336,7 @@ class Ui_MainWindow(object):
                 for day in data['forecast']['forecastday']:
                     n = 0
                     for time in ['morning', 'day', 'evening', 'night']:
-                        df2.loc[time + day['date']] = [value('temp_c', n, day['hour']), value('wind_kph', n, day['hour']),
+                        df2.loc[day['date'] + time] = [value('temp_c', n, day['hour']), value('wind_kph', n, day['hour']),
                                                     value('pressure_in', n, day['hour']) * 25.4,
                                                     value('humidity', n, day['hour'])]
                         n += 6

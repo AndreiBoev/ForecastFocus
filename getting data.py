@@ -87,7 +87,8 @@ def open_weather(KEY, name, days, lat, lon, ):
             df3 = pd.DataFrame(columns=['temp', 'wind', 'pressure', 'humidity'])
             for day in data['list']:
                 for time in ['morn', 'day', 'eve', 'night']:
-                    df3.loc[str(datetime.fromtimestamp(day['dt'])) + time] = [day['temp'][time], day['speed'],
+                    df3.loc[str(datetime.fromtimestamp(day['dt'])[0:10:]) + (
+                        time if time == 'day' or time == 'night' else time + 'ing')] = [day['temp'][time], day['speed'],
                                                                               day['pressure'],
                                                                               day['humidity']]
             df3.to_csv(f'{name}.csv', sep=';', index_label="time")
@@ -103,17 +104,18 @@ def weather_api(KEY, name, days, lat, lon):
     try:
         response = api(requests.get(url, params=params))
         if (data := response):
-            def value(parametr, start, list):
-                sum = 0
-                for dict in list[start:start + 6]:
-                    sum += dict[parametr]
-                return round(sum / 6, ndigits=2)
+            def value(parametr, start, lst):
+                sm = 0
+                for dict_j in lst[start:start + 6]:
+                    sm += dict_j[parametr]
+                return round(sm / 6, ndigits=2)
 
             df2 = pd.DataFrame(columns=['temp', 'wind', 'pressure', 'humidity'])
             for day in data['forecast']['forecastday']:
                 n = 0
                 for time in ['morning', 'day', 'evening', 'night']:
-                    df2.loc[time + day['date']] = [value('temp_c', n, day['hour']), value('wind_kph', n, day['hour']),
+                    df2.loc[day['date'] + time] = [value('temp_c', n, day['hour']),
+                                                   value('wind_kph', n, day['hour']) / 3.6,
                                                    value('pressure_in', n, day['hour']) * 25.4,
                                                    value('humidity', n, day['hour'])]
                     n += 6
@@ -124,6 +126,6 @@ def weather_api(KEY, name, days, lat, lon):
         print(f'request execution error: {e}')
 
 
-# open_weather(OPEN_WEATHER_KEY, 'ow08.06',  10,'55.75697232932146', '37.614235566135356' )
-# weather_api(WEATHER_API_KEY, 'wa08.06', 10, '55.75697232932146', '37.614235566135356')
+#open_weather(OPEN_WEATHER_KEY, 'ow08.06',  10,'55.75697232932146', '37.614235566135356' )
+#weather_api(WEATHER_API_KEY, 'wa08.06', 10, '55.75697232932146', '37.614235566135356')
 #yandex(YANDEX_KEY, 'yx08.06', 10, '55.75697232932146', '37.614235566135356')
