@@ -27,9 +27,12 @@ class Ui_MainWindow(object):
         font.setFamily("Comic Sans MS")
         font.setPointSize(13)
         MainWindow.setFont(font)
+
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("logo.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("logo.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off) # изменение иконки
         MainWindow.setWindowIcon(icon)
+        MainWindow.setWindowIcon(QIcon('logo.ico'))
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -128,6 +131,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        
         qApp.setStyleSheet("QMessageBox QPushButton { color: white; background-color: rgb(73, 140, 81); font: 13pt \"Comic Sans MS\";} \
                            QMessageBox QLabel { font: 13pt \"Comic Sans MS\"; }")                                                            # изменение стиля окна об ошибке
 
