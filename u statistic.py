@@ -69,15 +69,29 @@ forecast_df.set_index('time', inplace=True)
 # for column in df.columns:
 #    print(column, u_statistics(df[column].tolist(), real[column].tolist()))
 
-def graph(column, forecast_df, real_df):
+def graph(column, forecast_df, real_df, mode):
+    units_of_measurement = {'pressure': 'давление, мм.рт.ст.', 'humidity': 'влажность, %',
+                            'wind': 'скорость ветра, м/с', 'temp': 'температура, °C'}
     y2 = forecast_df[column].tolist()
     y1 = real_df[column].tolist()
     x = list(map(lambda x: x[8::], forecast_df.index.tolist()))
-    plt.plot(x, y1, '-', x, y2, '--', marker='o', markersize=7)
+    if mode == 'график':
+        plt.title('реальные и прогнозируемые данные')
+        plt.plot(x, y1, '-', x, y2, '--', marker='o', markersize=7)
+        plt.xlabel('дата и время')
+    else:
+        width = 0.35
+        fig, ax = plt.subplots()
+        ax.bar(x, y1, width, label='реальные данные')
+        ax.bar(x, y2, width, label='прогнозируемые данные')
+        ax.set_title('реальные и прогнозируемые данные')
+        ax.legend(loc='lower left', title='данные')
+
+    plt.ylabel(units_of_measurement[column])
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    # fig = plt.gcf()
-    # fig.set_size_inches(18.5, 10.5)
+    fig = plt.gcf()
+    fig.set_size_inches(9, 6)
     plt.show()
 
 
