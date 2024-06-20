@@ -5,6 +5,9 @@ import os
 from dotenv import load_dotenv
 import datetime
 from dateutil import parser as dtparser
+import matplotlib.pyplot as plt
+import pygetwindow as gw
+import pyautogui
 
 load_dotenv()
 WEATHER_API_KEY = str(os.getenv('WEATHER_API_KEY'))
@@ -36,7 +39,7 @@ def real_data(lat, lon, start, end):
                 n = 0
                 for time in ['morning', 'day', 'evening', 'night']:
                     df2.loc[day['date'] + time] = [value('temp_c', n, day['hour']),
-                                                   value('wind_kph', n, day['hour']) / 3.6,
+                                                   round(value('wind_kph', n, day['hour']) / 3.6, 2),
                                                    value('pressure_in', n, day['hour']) * 25.4,
                                                    value('humidity', n, day['hour'])]
                     n += 6
@@ -56,11 +59,35 @@ def u_statistics(listf, listy):
     return e / (y + f)
 
 
-df = pd.read_csv(r"file.csv", sep=';')
-df.set_index('time', inplace=True)
+forecast_df = pd.read_csv("2024-05-22_RedSquar.csv", sep=';')
+forecast_df.set_index('time', inplace=True)
 
-real = real_data('55.803788', '37.402695', change(df.iloc[0].name[0:10:], -1), change(df.iloc[-1].name[0:10:], 1))
-real = real[df.iloc[0].name:df.iloc[-1].name]
 
-for column in df.columns:
-    print(column, u_statistics(df[column].tolist(), real[column].tolist()))
+# real = real_data('55.75697232932146', '37.614235566135356', change(df.iloc[0].name[0:10:], -1), change(df.iloc[-1].name[0:10:], 1))
+# real = real[df.iloc[0].name:df.iloc[-1].name]
+# real.to_csv(f'real_data_test.csv', sep=';', index_label="time")
+# for column in df.columns:
+#    print(column, u_statistics(df[column].tolist(), real[column].tolist()))
+
+def graph(column, forecast_df, real_df):
+    y2 = forecast_df[column].tolist()
+    y1 = real_df[column].tolist()
+    x = list(map(lambda x: x[8::], forecast_df.index.tolist()))
+    plt.plot(x, y1, '-', x, y2, '--', marker='o', markersize=7)
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    # fig = plt.gcf()
+    # fig.set_size_inches(18.5, 10.5)
+    plt.show()
+
+
+def report():
+    active_window = gw.getActiveWindow()
+    left, top, right, bottom = active_window.left, active_window.top, active_window.right, active_window.bottom
+
+    screenshot = pyautogui.screenshot(region=(left, top, right - left, bottom - top))
+    screenshotPath = 'report.pdf'
+    screenshot.save(screenshotPath)
+
+# graph('temp', forecast_df, real_df)
+# report()
