@@ -16,7 +16,7 @@ OPEN_WEATHER_KEY = str(os.getenv('OPEN_WEATHER_API_KEY'))
 WEATHER_API_KEY = str(os.getenv('WEATHER_API_KEY'))
 
 
-class Ui_MainWindow(object):
+class GetForecastWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
@@ -234,11 +234,11 @@ class Ui_MainWindow(object):
         error.setStandardButtons(QMessageBox.Ok)
         error.exec()
 
-    def succ_get(self, webs):
+    def succ_get(self):
         succ = QMessageBox()
         succ.setWindowTitle("Запрос выполнен")
-        succ.setText(f"Данные c {webs} успешно получены")
-        succ.setIcon(QMessageBox.information)
+        succ.setText(f"Данные успешно получены")
+        succ.setIcon(QMessageBox.Information)
         succ.setStandardButtons(QMessageBox.Ok)
         succ.exec()
 
@@ -389,9 +389,12 @@ class Ui_MainWindow(object):
                 path = f"data/{folder_name}"
                 os.makedirs(path)
 
-                self.open_weather(OPEN_WEATHER_KEY, path + "/OpenWather",  days, str(Lat), str(Lng) )
+                self.open_weather(OPEN_WEATHER_KEY, path + "/OpenWeather",  days, str(Lat), str(Lng) )
                 self.weather_api(WEATHER_API_KEY, path + "/WeatherAPI", days, str(Lat), str(Lng))
                 self.yandex(YANDEX_KEY, path + "/YandexWeather", days, str(Lat), str(Lng))
+
+                self.succ_get()
+
 
             else:
                 self.NoCord("Lng")
@@ -401,12 +404,12 @@ class Ui_MainWindow(object):
         
 
 
-
+'''
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
+    ui = GetForecastWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec_())'''
